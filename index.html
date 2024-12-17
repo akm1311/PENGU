@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Eligibility Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            text-align: center;
+            background-color: #4CAF50;
+            padding: 10px 0;
+            color: white;
+        }
+        header img {
+            width: 80px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        h2 {
+            text-align: center;
+            margin: 20px 0;
+        }
+        textarea {
+            display: block;
+            margin: 0 auto 10px;
+            width: 80%;
+            max-width: 600px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        button {
+            display: block;
+            margin: 0 auto 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        footer a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Placeholder for your logo -->
+        <img src="https://via.placeholder.com/80" alt="Logo">
+        <h1>Wallet Eligibility Checker</h1>
+    </header>
+
+    <h2>Enter Wallet Addresses</h2>
+    <textarea id="walletsInput" rows="5" placeholder="Enter wallet addresses, one per line"></textarea>
+    <button onclick="checkEligibility()">Check Eligibility</button>
+    <h3 style="text-align: center;">Results:</h3>
+    <pre id="results">Results will appear here...</pre>
+
+    <footer>
+        Created with ❤️ by <a href="https://twitter.com/your_twitter_handle" target="_blank">@your_twitter_handle</a>
+    </footer>
+
+    <script>
+        async function checkEligibility() {
+            const walletAddresses = document.getElementById("walletsInput").value.split('\n').map(w => w.trim()).filter(w => w);
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.textContent = "Checking...";
+
+            let output = "";
+            let totalAmount = 0;
+
+            for (const wallet of walletAddresses) {
+                const url = `https://api.clusters.xyz/v0.1/airdrops/pengu/eligibility/${wallet}?`;
+                
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.categories) {
+                        data.categories.forEach(category => {
+                            category.items.forEach(item => {
+                                output += `Wallet: ${item.address}\nAmount: ${item.amount}\nCategory: ${category.category}\n\n`;
+                                totalAmount += item.amount;
+                            });
+                        });
+                    } else {
+                        output += `Wallet: ${wallet}\nNo eligibility data found.\n\n`;
+                    }
+                } catch (error) {
+                    output += `Wallet: ${wallet}\nError fetching data.\n\n`;
+                }
+            }
+
+            output += `Total Sum of Amount: ${totalAmount}`;
+            resultsContainer.textContent = output;
+        }
+    </script>
+</body>
+</html>
